@@ -1,0 +1,33 @@
+# CT2-PyRadiomics-v5-GRAPE-aligned
+# Inputs are already outcome-blind, resampled to 0.717 x 0.717 x 5.0 mm and
+# globally standardised with training-set statistics. Do not add a second
+# resampling or image normalisation step in PyRadiomics.
+imageType:
+  Original: {}
+  LoG:
+    sigma: [1.0, 2.0, 3.0]
+  Wavelet: {}
+  Square: {}
+  SquareRoot: {}
+  Logarithm: {}
+  Exponential: {}
+  Gradient: {}
+
+featureClass:
+  firstorder: []
+  shape: []
+  glcm: []
+  glrlm: []
+  glszm: []
+  gldm: []
+  ngtdm: []
+
+setting:
+  # Equivalent to the original 25-HU discretisation after /343.2645508435945 scaling.
+  binWidth: 0.072829
+  padDistance: 5
+  label: 1
+  correctMask: true
+  geometryTolerance: 0.001
+  force2D: false
+  normalize: false
