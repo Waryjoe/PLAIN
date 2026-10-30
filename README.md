@@ -1,94 +1,53 @@
-# PLAIN: Clinical and Dual-ROI Radiomics Code
+# PLAIN
 
-Code supporting **Preoperative Leakage Assessment Integrating clinical data and
-Noncontrast CT (PLAIN)**, a gastric-cancer anastomotic-leakage research project.
+Core research code for Preoperative Leakage Assessment Integrating clinical data
+and Noncontrast CT. This minimal archive contains only model generation, CT/ROI
+preprocessing, and stomach/tumor dual-ROI radiomics extraction.
 
-**Release status: curated code-only prerelease, 2026-10-29.** This is an archive
-of selected analysis scripts, not a claim that every current manuscript number
-has been reproduced. No clinical data, CT images, masks, pathology slides,
-patient-level predictions, fitted models, or private linkage tables are included.
-The synthetic example is fictitious. This repository is for research, not
-clinical decision-making.
+## Included workflows
 
-[中文说明](README.zh-CN.md) | [Analysis map](docs/ANALYSIS_MAP.md) |
-[Run guide](docs/RUNNING.md) | [Reproducibility status](docs/REPRODUCIBILITY.md)
+| Workflow | Script in `scripts/` |
+| --- | --- |
+| CT/ROI alignment, cropping, resampling and training-derived intensity standardization | `preprocess_all_cases_blinded_v5_grape_aligned.py` |
+| PyRadiomics extraction for stomach and tumor ROIs | `extract_pyradiomics.py` |
+| Batch dual-ROI extraction and feature-count checks | `run_ct2_pyradiomics_v5_grape_batch.py` |
+| Clinical model training and out-of-fold predictions | `benchmark_nine_preoperative_clinical_models_training_oof.R` |
+| Clinical model fitting and held-out internal evaluation | `benchmark_nine_preoperative_clinical_models.R` |
+| Radiomics model comparison and logistic clinical-radiomics fusion | `benchmark_v5_radiomics_ml_and_clinical_fusion.R` |
 
-## Contents
+The model scripts cover logistic regression, BPNN, decision trees, GBDT, naive
+Bayes, KNN, PLS-DA, random forest, SVM, LightGBM, XGBoost, and Boruta plus logistic
+regression. Fusion uses the logits of clinical and radiomics probabilities.
 
-- `scripts/`: 23 curated historical scripts, portable path helpers, and a new
-  prediction-evaluation utility.
-- `configs/`: byte-preserved v5 extraction configuration and a separately
-  identified legacy v1 configuration. They are **not interchangeable**.
-- `examples/`: deterministic synthetic-data generator, no study records.
-- `tests/` and `tools/`: checks for syntax, path resolution, evaluation functions,
-  file integrity, and common publication-privacy hazards.
-- `environment/`: dependency lists, explicitly not a fully validated lockfile.
-- `SOURCE_MANIFEST.csv`: original and packaged source hashes, transformation
-  counts, and analysis scope. Original absolute locations stay private.
+`plain_paths.py` and `plain_paths.R` provide portable paths. `configs/` contains
+the v5 extraction settings (1,595 features per ROI); `environment/` lists required
+Python and R packages. Analytical formulas and core scripts are unchanged.
 
-The original script filenames and analytical formulas were retained. Packaging
-changes replace machine-specific paths with `plain_path(...)` and replace
-literal private case identifiers with non-identifying placeholders. See
-[reproducibility notes](docs/REPRODUCIBILITY.md) for the limitations of these edits.
+## Running
 
-## Quick Synthetic Demo
+Run from the repository root. Install Python dependencies from
+`environment/requirements-radiomics.txt` and the R packages listed in
+`environment/r-packages.txt`. These lists are not a fully validated environment lock.
 
-Run commands from the repository root. Python 3.9+ is sufficient for the demo
-generator and package tests. R with `pROC` is needed for evaluation.
+Set `PLAIN_PROJECT_ROOT` to a working copy of authorized private inputs. Defaults
+use `private_workspace/project/`. Some scripts overwrite derived outputs, so do
+not use the only copy of source data.
 
-```bash
-python3 -m unittest discover -s tests -v
-python3 tools/check_release.py
-python3 examples/make_synthetic_predictions.py outputs/demo_predictions.csv
-Rscript scripts/evaluate_predictions.R outputs/demo_predictions.csv outputs/demo_evaluation
-Rscript tests/test_evaluation.R
-```
+The historical scripts require their original workbook/manifest schemas. Clinical
+training requires the preselected nine-variable candidate workbook; radiomics
+training requires assembled feature matrices and a precomputed training-only
+LASSO stability ranking. Fusion also requires clinical out-of-fold and validation
+predictions. These private inputs and upstream screening outputs are not included.
+The cohort-specific batch script retains its original 820-case checks. The v5
+configuration must not be substituted for a separately locked v1 protocol.
 
-Install `pROC` in your own R environment if it is not already available:
+## Scope and privacy
 
-```r
-install.packages("pROC")
-```
-
-The example writes AUC/DeLong confidence intervals, Brier scores, ROC points,
-grouped calibration, DCA values, and a vector PDF. It does not train PLAIN,
-reproduce its reported performance, alter probabilities, smooth DCA, or select
-patients. Use a new output directory for each run.
-
-## Original Analyses
-
-The archived scripts require the authorized private input workbooks/manifests,
-their original sheet/column schemas, and compatible Python/R dependencies.
-They are deliberately not run on synthetic inputs with invented study results.
-Set `PLAIN_PROJECT_ROOT` to a **working copy** of the private study directory,
-then follow [RUNNING.md](docs/RUNNING.md). Do not point it at the only copy of
-source data: some historical scripts overwrite derived outputs.
-
-The current manuscript branch uses the v5 preprocessed radiomics matrix. The
-legacy v1 protocol remains unchanged and is provided for provenance only; do
-not silently substitute it for v5 or use v5 for new v1-locked extractions.
-
-## Important Interpretation Limits
-
-The Ningbo 133-case and Liaoning 355-case displays involve historical post-hoc,
-outcome/performance-informed subset selection. Standard CIs on these subsets
-do not account for that selection and cannot establish independent external
-validation. These subsets must not be described as ordinary missing-data
-exclusions without source evidence. The subset plotting script retains this
-qualification; the optimization scripts and private membership lists are not
-part of this curated main-analysis package.
-
-Code organization does not resolve these design issues. Current manuscript
-claims, final cohort provenance, and manually updated figure values require
-author reconciliation before a publication-linked release.
-
-## Data, Rights, and Citation
-
-No patient data are distributed. Access requires institutional authorization;
-this package makes no promise of data availability. Do not commit private
-workspaces, outputs, models, slide labels, or notebook outputs. `.gitignore` is
-only a convenience, not de-identification. Review staged files before pushing.
-
-The authors have not selected a software license or supplied a final citation
-for this release. No open-source license or DOI is asserted here. See
-[LICENSING.md](LICENSING.md) and [PUBLICATION_CHECKLIST.md](docs/PUBLICATION_CHECKLIST.md).
+This is a code-only archive, not a one-command reproduction of all final manuscript
+results or a clinical-use model. Historical feature selection/tuning is not fully
+nested within all out-of-fold estimates. Previously post-hoc-selected cohorts do
+not establish independent external validation; final cohort provenance and figure
+values still require author reconciliation. No patient records, CT images, ROI
+masks, pathology images, patient-level predictions, trained models, or private
+linkage files are distributed. `.gitignore` is a safeguard, not de-identification.
+No software license or final article DOI has been assigned in this archive.
