@@ -1,0 +1,11 @@
+# Dependency inventory, not an exact historical lockfile.
+numpy
+pandas
+scipy
+scikit-learn
+statsmodels
+joblib
+openpyxl
+python-docx
+lxml
+SimpleITK

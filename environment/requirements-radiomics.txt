@@ -1,0 +1,9 @@
+# Separate extraction environment. Clean installation has not been validated here.
+pyradiomics==3.0.1
+SimpleITK==2.5.5
+numpy<2
+pandas
+openpyxl
+PyWavelets
+pykwalify
+six
